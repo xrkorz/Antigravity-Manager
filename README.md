@@ -41,6 +41,16 @@
 | <img src="docs/images/packycode_logo.png" width="200" alt="PackyCode Logo"> | 感谢 **PackyCode** 对本项目的赞助！PackyCode 是一家可靠高效的 API 中转服务商，提供 Claude Code、Codex、Gemini 等多种服务的中转。PackyCode 为本项目的用户提供了特别优惠：使用[此链接](https://www.packyapi.com/register?aff=Ctrler)注册，并在充值时输入 **“Ctrler”** 优惠码即可享受 **九折优惠**。 |
 | :--- | :--- |
 
+### ☕ 支持项目 (Support)
+
+如果您觉得本项目对您有所帮助，欢迎打赏作者！
+
+<a href="https://www.buymeacoffee.com/Ctrler" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-green.png" alt="请我喝杯咖啡" style="height: 60px !important; width: 217px !important;"></a>
+
+| 支付宝 (Alipay) | 微信支付 (WeChat) | Buy Me a Coffee |
+| :---: | :---: | :---: |
+| ![Alipay](./docs/images/donate_alipay.png) | ![WeChat](./docs/images/donate_wechat.png) | ![Coffee](./docs/images/donate_coffee.png) |
+
 ## 🌟 深度功能解析 (Detailed Features)
 
 ### 1. 🎛️ 智能账号仪表盘 (Smart Dashboard)
@@ -72,18 +82,18 @@
 
 ## 📸 界面导览 (GUI Overview)
 
-![仪表盘 - 全局配额监控与一键切换](docs/images/dashboard-light.png)
-![账号列表 - 高密度配额展示与 403 智能标注](docs/images/accounts-light.png)
-![关于页面 - 关于 Antigravity Tools](docs/images/about-dark.png)
-![API 反代 - 服务控制](docs/images/v3/proxy-settings.png)
-![系统设置 - 通用配置](docs/images/settings-dark.png)
+| | |
+| :---: | :---: |
+| ![仪表盘 - 全局配额监控与一键切换](docs/images/dashboard-light.png) <br> 仪表盘 | ![账号列表 - 高密度配额展示与 403 智能标注](docs/images/accounts-light.png) <br> 账号列表 |
+| ![关于页面 - 关于 Antigravity Tools](docs/images/about-dark.png) <br> 关于页面 | ![API 反代 - 服务控制](docs/images/v3/proxy-settings.png) <br> API 反代 |
+| ![系统设置 - 通用配置](docs/images/settings-dark.png) <br> 系统设置 | |
 
 ### 💡 使用案例 (Usage Examples)
 
-![Claude Code 联网搜索 - 结构化来源与引文显示](docs/images/usage/claude-code-search.png)
-![Cherry Studio 深度集成 - 原生回显搜索引文与来源链接](docs/images/usage/cherry-studio-citations.png)
-![Imagen 3 高级绘图 - 完美还原 Prompt 意境与细节](docs/images/usage/image-gen-nebula.png)
-![Kilo Code 接入 - 多账号极速轮换与模型穿透](docs/images/usage/kilo-code-integration.png)
+| | |
+| :---: | :---: |
+| ![Claude Code 联网搜索 - 结构化来源与引文显示](docs/images/usage/claude-code-search.png) <br> Claude Code 联网搜索 | ![Cherry Studio 深度集成 - 原生回显搜索引文与来源链接](docs/images/usage/cherry-studio-citations.png) <br> Cherry Studio 深度集成 |
+| ![Imagen 3 高级绘图 - 完美还原 Prompt 意境与细节](docs/images/usage/image-gen-nebula.png) <br> Imagen 3 高级绘图 | ![Kilo Code 接入 - 多账号极速轮换与模型穿透](docs/images/usage/kilo-code-integration.png) <br> Kilo Code 接入 |
 
 ## 🏗️ 技术架构 (Architecture)
 
@@ -120,6 +130,10 @@ brew install --cask antigravity-tools
 *   **macOS**: `.dmg` (支持 Apple Silicon & Intel)
 *   **Windows**: `.msi` 或 便携版 `.zip`
 *   **Linux**: `.deb` 或 `AppImage`
+
+---
+
+Copyright © 2024-2026 [lbjlaq](https://github.com/lbjlaq)
 
 ### 🛠️ 常见问题排查 (Troubleshooting)
 
@@ -183,7 +197,11 @@ print(response.choices[0].message.content)
 
 *   **版本演进 (Changelog)**:
     *   **v3.3.26 (2026-01-13)**:
-        - **MCP 工具兼容性增强 (修复 Issue #593)**:
+        - **配额保护与调度优化 (Fix Issue #595 - 零配额账户仍进入队列)**:
+            - **配额保护逻辑重构**: 修复了配额保护因依赖不存在的 `limit/remaining` 字段而失效的问题。现在直接使用模型数据中始终存在的 `percentage` 字段，确保任何受监控模型（如 Claude 4.5 Sonnet）配额低于阈值时，账号都能被立即禁用。
+            - **账号优先级算法升级**: 账号调度优先级不再仅依赖订阅等级。在同等级（Ultra/Pro/Free）内，系统现在会优先选择**最大模型剩余百分比**最高的账号，避免对濒临耗尽的账号进行“压榨”，显著降低 429 错误率。
+            - **保护日志增强**: 触发配额保护时的日志现在会明确指出具体是哪个模型触发了阈值（例如：`quota_protection: claude-sonnet-4-5 (0% <= 10%)`），便于排查。
+        - **MCP 工具兼容性增强 (Fix Issue #593)**:
             - **深度 cache_control 清理**: 实现了多层次的 `cache_control` 字段清理机制,彻底解决 Chrome Dev Tools MCP 等工具在 thinking block 中包含 `cache_control` 导致的 "Extra inputs are not permitted" 错误。
                 - **增强日志追踪**: 添加 `[DEBUG-593]` 日志前缀,记录消息索引和块索引,便于问题定位和调试。
                 - **递归深度清理**: 新增 `deep_clean_cache_control()` 函数,递归遍历所有嵌套对象和数组,移除任何位置的 `cache_control` 字段。
@@ -223,6 +241,9 @@ print(response.choices[0].message.content)
             - **SSE 错误事件**: 实现了标准的 SSE 错误事件传播,前端可捕获并优雅展示错误,包含详细的解决建议(如检查网络、代理等)。
             - **多语言错误消息 (i18n)**: 错误消息已集成 i18n 系统,支持所有 6 种语言(zh, en, zh-TW, ja, tr, vi)。非浏览器客户端自动回退到英文提示。
         - **影响范围**: 此更新显著提升了 Claude 4.5 Opus、Gemini 3 Pro 等 thinking 模型的多轮对话稳定性,特别是在使用 MCP 工具和长会话场景下。
+    <details>
+    <summary>显示旧版本日志 (v3.3.24 及更早)</summary>
+
     *   **v3.3.24 (2026-01-12)**:
         - **UI 交互改进 (UI Interaction Improvements)**:
             - **卡片式模型选择**: 设置页面的“配额保护”与“智能预热”模型选择升级为卡片式设计，支持选中状态勾选及未选中状态下显眼的边缘提示。
@@ -911,6 +932,7 @@ print(response.choices[0].message.content)
         - **提示**：目前 `antigravity` 与 Google 官方工具重名。为确保安装的是本项目，目前推荐使用上述原始文件安装。后续我们将推出官方 Tap。
         - **全局上游代理**: 统一管理内外网请求，支持 HTTP/SOCKS5 协议及热重载。
 
+    </details>
 ## 👥 核心贡献者 (Contributors)
 
 <a href="https://github.com/lbjlaq"><img src="https://github.com/lbjlaq.png" width="50px" style="border-radius: 50%;" alt="lbjlaq"/></a>

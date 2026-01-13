@@ -42,6 +42,16 @@ By leveraging this app, you can transform common Web Sessions (Google/Anthropic)
 | <img src="docs/images/packycode_logo.png" width="200" alt="PackyCode Logo"> | Thanks to **PackyCode** for sponsoring this project! PackyCode is a reliable and efficient API relay service provider, offering relays for various services such as Claude Code, Codex, and Gemini. PackyCode provides a special offer for users of this project: Register using [this link](https://www.packyapi.com/register?aff=Ctrler) and enter the **"Ctrler"** coupon code when topping up to enjoy a **10% discount**. |
 | :--- | :--- |
 
+### ☕ Support
+
+If you find this project helpful, feel free to buy me a coffee!
+
+<a href="https://www.buymeacoffee.com/Ctrler" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-green.png" alt="Buy Me A Coffee" style="height: 60px !important; width: 217px !important;"></a>
+
+| Alipay | WeChat Pay | Buy Me a Coffee |
+| :---: | :---: | :---: |
+| ![Alipay](./docs/images/donate_alipay.png) | ![WeChat](./docs/images/donate_wechat.png) | ![Coffee](./docs/images/donate_coffee.png) |
+
 ## 🌟 Detailed Feature Matrix
 
 ### 1. 🎛️ Smart Account Dashboard
@@ -49,7 +59,7 @@ By leveraging this app, you can transform common Web Sessions (Google/Anthropic)
 *   **Smart Recommendation**: The system uses a real-time algorithm to filter and recommend the "Best Account" based on quota redundancy, supporting **one-click switching**.
 *   **Active Account Snapshot**: Visually displays the specific quota percentage and the last synchronization time of the currently active account.
 
-### 2. 🔐 Professional AI Account Management & Proxy System (v3.3.25)
+### 2. 🔐 Professional AI Account Management & Proxy System (v3.3.26)
 *   **OAuth 2.0 Authorization (Auto/Manual)**: Pre-generates a copyable authorization URL so you can finish auth in any browser; after the callback, the app auto-completes and saves the account (use “I already authorized, continue” if needed).
 *   **Multi-dimensional Import**: Supports single token entry, JSON batch import, and automatic hot migration from V1 legacy databases.
 *   **Gateway-level Views**: Supports switching between "List" and "Grid" views. Provides 403 Forbidden detection, automatically marking and skipping accounts with permission anomalies.
@@ -73,18 +83,18 @@ By leveraging this app, you can transform common Web Sessions (Google/Anthropic)
 
 ##  GUI Overview
 
-![Dashboard - Global Quota Monitoring & One-click Switch](docs/images/dashboard-light.png)
-![Account List - High-density Quota Display & Smart 403 Labeling](docs/images/accounts-light.png)
-![About Page - About Antigravity Tools](docs/images/about-dark.png)
-![API Proxy - Service Control](docs/images/v3/proxy-settings.png)
-![Settings - General Config](docs/images/settings-dark.png)
+| | |
+| :---: | :---: |
+| ![Dashboard - Global Quota Monitoring & One-click Switch](docs/images/dashboard-light.png) <br> Dashboard | ![Account List - High-density Quota Display & Smart 403 Labeling](docs/images/accounts-light.png) <br> Account List |
+| ![About Page - About Antigravity Tools](docs/images/about-dark.png) <br> About Page | ![API Proxy - Service Control](docs/images/v3/proxy-settings.png) <br> API Proxy |
+| ![Settings - General Config](docs/images/settings-dark.png) <br> Settings | |
 
 ### 💡 Usage Examples
 
-![Claude Code Web Search - Structured source and citation display](docs/images/usage/claude-code-search.png)
-![Cherry Studio Deep Integration - Native echo of search citations and source links](docs/images/usage/cherry-studio-citations.png)
-![Imagen 3 Advanced Drawing - Perfect restoration of Prompt artistic conception and details](docs/images/usage/image-gen-nebula.png)
-![Kilo Code Integration - Multi-account high-speed rotation and model penetration](docs/images/usage/kilo-code-integration.png)
+| | |
+| :---: | :---: |
+| ![Claude Code Web Search - Structured source and citation display](docs/images/usage/claude-code-search.png) <br> Claude Code Web Search | ![Cherry Studio Deep Integration - Native echo of search citations and source links](docs/images/usage/cherry-studio-citations.png) <br> Cherry Studio Integration |
+| ![Imagen 3 Advanced Drawing - Perfect restoration of Prompt artistic conception and details](docs/images/usage/image-gen-nebula.png) <br> Imagen 3 Advanced Drawing | ![Kilo Code Integration - Multi-account high-speed rotation and model penetration](docs/images/usage/kilo-code-integration.png) <br> Kilo Code Integration |
 
 ## 🏗️ Architecture
 
@@ -169,6 +179,10 @@ print(response.choices[0].message.content)
 
 *   **Changelog**:
     *   **v3.3.26 (2026-01-13)**:
+        - **Quota Protection & Scheduling Optimization (Fix Issue #595 - Zero Quota Accounts in Queue)**:
+            - **Quota Protection Logic Refactor**: Fixed the issue where quota protection failed due to reliance on non-existent `limit/remaining` fields. It now directly uses the `percentage` field, ensuring that accounts are immediately disabled if any monitored model (e.g., Claude 4.5 Sonnet) falls below the threshold.
+            - **Priority Algorithm Upgrade**: Account scheduling priority is no longer solely based on subscription tiers. Within the same tier (Ultra/Pro/Free), the system now prioritizes accounts with the **highest maximum remaining percentage**, preventing "squeezing" of near-empty accounts and significantly reducing 429 errors.
+            - **Enhanced Protection Logs**: Logs when quota protection is triggered now explicitly state which model triggered the threshold (e.g., `quota_protection: claude-sonnet-4-5 (0% <= 10%)`), facilitating troubleshooting.
         - **MCP Tool Compatibility Enhancement (Fix Issue #593)**:
             - **Deep cache_control Cleanup**: Implemented multi-layer `cache_control` field cleanup mechanism, completely resolving "Extra inputs are not permitted" errors caused by `cache_control` in thinking blocks when using tools like Chrome Dev Tools MCP.
                 - **Enhanced Log Tracking**: Added `[DEBUG-593]` log prefix, recording message and block indices for easy problem localization and debugging.
@@ -209,6 +223,9 @@ print(response.choices[0].message.content)
             - **SSE Error Events**: Implemented standard SSE error event propagation, allowing the frontend to gracefully display errors with detailed suggestions (check network, proxy, etc.).
             - **Multi-language Error Messages (i18n)**: Error messages are now integrated with the i18n system, supporting all 6 languages (zh, en, zh-TW, ja, tr, vi). Non-browser clients automatically fallback to English messages.
         - **Impact**: This update significantly improves multi-turn conversation stability for thinking models like Claude 4.5 Opus and Gemini 3 Pro, especially in scenarios using MCP tools and long sessions.
+    <details>
+    <summary>Show older changelog (v3.3.24 and earlier)</summary>
+
     *   **v3.3.24 (2026-01-12)**:
         - **UI Interaction Improvements**:
             - **Card-based Model Selection**: Upgraded model selection in "Quota Protection" and "Smart Warmup" to a card-based design with checkmarks for selected states and clear borders for unselected states.
@@ -595,6 +612,7 @@ print(response.choices[0].message.content)
         - **Global Upstream Proxy**: Centralized request management supporting HTTP/SOCKS5 with hot-reloading.
     *   See [Releases](https://github.com/lbjlaq/Antigravity-Manager/releases) for earlier history.
 
+    </details>
 ## 👥 Contributors
 
 <a href="https://github.com/lbjlaq"><img src="https://github.com/lbjlaq.png" width="50px" style="border-radius: 50%;" alt="lbjlaq"/></a>
