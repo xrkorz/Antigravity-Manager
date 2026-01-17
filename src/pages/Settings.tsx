@@ -8,6 +8,7 @@ import ModalDialog from '../components/common/ModalDialog';
 import { showToast } from '../components/common/ToastContainer';
 import QuotaProtection from '../components/settings/QuotaProtection';
 import SmartWarmup from '../components/settings/SmartWarmup';
+import PinnedQuotaModels from '../components/settings/PinnedQuotaModels';
 
 import { useTranslation } from 'react-i18next';
 
@@ -43,6 +44,9 @@ function Settings() {
             enabled: false,
             threshold_percentage: 10,
             monitored_models: []
+        },
+        pinned_quota_models: {
+            models: ['gemini-3-pro-high', 'gemini-3-flash', 'gemini-3-pro-image', 'claude-sonnet-4-5-thinking']
         }
     });
 
@@ -492,6 +496,17 @@ function Settings() {
                                     onChange={(newConfig) => setFormData({
                                         ...formData,
                                         quota_protection: newConfig
+                                    })}
+                                />
+                            </div>
+
+                            {/* 配额关注列表 (Pinned Quota Models) */}
+                            <div className="group bg-white dark:bg-base-100 rounded-xl p-5 border border-gray-100 dark:border-base-200 hover:border-indigo-200 transition-all duration-300 shadow-sm">
+                                <PinnedQuotaModels
+                                    config={formData.pinned_quota_models}
+                                    onChange={(newConfig) => setFormData({
+                                        ...formData,
+                                        pinned_quota_models: newConfig
                                     })}
                                 />
                             </div>
