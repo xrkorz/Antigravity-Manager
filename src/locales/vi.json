@@ -642,6 +642,10 @@
             "btn_sync": "Đồng bộ ngay",
             "btn_view": "Xem cấu hình",
             "btn_restore": "Khôi phục",
+            "btn_restore_backup": "Khôi phục bản sao lưu",
+            "restore_backup_confirm": "Tìm thấy cấu hình sao lưu. Bạn có chắc chắn muốn khôi phục không?",
+            "sync_confirm_title": "Xác nhận đồng bộ",
+            "sync_confirm_message": "Đã sẵn sàng đồng bộ cấu hình {{name}}. ⚠️ Cảnh báo: Thao tác này sẽ ghi đè các tệp cấu hình cục bộ hiện có của bạn (ví dụ: token đăng nhập, API Key). Bạn có chắc chắn muốn tiếp tục không?",
             "restore_confirm": "Bạn có chắc muốn khôi phục cấu hình {{name}} về mặc định không?",
             "modal": {
                 "view_title": "Nội dung cấu hình {{name}}",

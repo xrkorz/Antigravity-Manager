@@ -657,7 +657,9 @@
             "btn_sync": "立即同步配置",
             "btn_view": "查看当前配置",
             "btn_restore": "恢复默认配置",
+            "btn_restore_backup": "恢复原有配置",
             "restore_confirm": "确定要将 {{name}} 的配置恢复为官方默认地址吗？",
+            "restore_backup_confirm": "检测到旧的配置文件备份，确定要还原吗？",
             "modal": {
                 "view_title": "{{name}} 配置文件内容",
                 "copy_success": "配置内容已复制"
@@ -665,7 +667,9 @@
             "toast": {
                 "sync_success": "同步成功！{{name}} 已准备就绪。",
                 "sync_error": "同步失败：{{error}}"
-            }
+            },
+            "sync_confirm_title": "同步确认",
+            "sync_confirm_message": "即将为您同步 {{name}} 的配置。⚠️ 注意：此操作将覆盖您本地已有的配置文件（如登录状态、API Key 等）。确定要继续吗？"
         }
     },
     "monitor": {

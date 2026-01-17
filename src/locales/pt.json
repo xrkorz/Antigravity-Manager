@@ -645,6 +645,10 @@
             "btn_sync": "Sincronizar Agora",
             "btn_view": "Ver Config",
             "btn_restore": "Restaurar Padrão",
+            "btn_restore_backup": "Restaurar Backup",
+            "restore_backup_confirm": "Configuração de backup encontrada. Tem certeza de que deseja restaurá-la?",
+            "sync_confirm_title": "Confirmação de Sincronização",
+            "sync_confirm_message": "Pronto para sincronizar a configuração do {{name}}. ⚠️ Aviso: Isso substituirá seus arquivos de configuração local existentes (como tokens de login, chaves de API). Tem certeza de que deseja continuar?",
             "restore_confirm": "Tem certeza que deseja restaurar a config de {{name}} para o padrão?",
             "modal": {
                 "view_title": "Conteúdo do arquivo {{name}}",

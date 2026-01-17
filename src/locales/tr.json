@@ -611,6 +611,10 @@
             "btn_sync": "Şimdi Senkronize Et",
             "btn_view": "Yapılandırmayı Görüntüle",
             "btn_restore": "Varsayılana Dön",
+            "btn_restore_backup": "Yedeği Geri Yükle",
+            "restore_backup_confirm": "Yedek yapılandırma bulundu. Geri yüklemek istediğinizden emin misiniz?",
+            "sync_confirm_title": "Senkronizasyon Onayı",
+            "sync_confirm_message": "{{name}} yapılandırmasını senkronize etmeye hazır. ⚠️ Uyarı: Bu işlem mevcut yerel yapılandırma dosyalarınızın (ör. oturum belirteçleri, API Anahtarları) üzerine yazacaktır. Devam etmek istediğinizden emin misiniz?",
             "restore_confirm": "{{name}} yapılandırmasını varsayılan değerlere sıfırlamak istediğinizden emin misiniz?",
             "modal": {
                 "view_title": "{{name}} Yapılandırma İçeriği",

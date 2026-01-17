@@ -597,11 +597,11 @@ mod tests {
                 total_token_count: Some(15),
                 cached_content_token_count: None,
             }),
-            model_version: Some("gemini-2.5-pro".to_string()),
+            model_version: Some("gemini-2.5-flash".to_string()),
             response_id: Some("resp_123".to_string()),
         };
 
-        let result = transform_response(&gemini_resp, false, 1_000_000, None, "gemini-2.5-pro".to_string());
+        let result = transform_response(&gemini_resp, false, 1_000_000, None, "gemini-2.5-flash".to_string());
         assert!(result.is_ok());
 
         let claude_resp = result.unwrap();
@@ -647,11 +647,11 @@ mod tests {
                 grounding_metadata: None,
             }]),
             usage_metadata: None,
-            model_version: Some("gemini-2.5-pro".to_string()),
+            model_version: Some("gemini-2.5-flash".to_string()),
             response_id: Some("resp_456".to_string()),
         };
 
-        let result = transform_response(&gemini_resp, false, 1_000_000, None, "gemini-2.5-pro".to_string());
+        let result = transform_response(&gemini_resp, false, 1_000_000, None, "gemini-2.5-flash".to_string());
         assert!(result.is_ok());
 
         let claude_resp = result.unwrap();

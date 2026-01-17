@@ -4,6 +4,11 @@ use std::path::PathBuf;
 use std::process::Command;
 use std::fs;
 
+#[cfg(target_os = "windows")]
+use std::os::windows::process::CommandExt;
+
+const CREATE_NO_WINDOW: u32 = 0x08000000;
+
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub enum CliApp {
     Claude,
@@ -83,6 +88,7 @@ pub struct CliStatus {
     pub installed: bool,
     pub version: Option<String>,
     pub is_synced: bool,
+    pub has_backup: bool,
     pub current_base_url: Option<String>,
     pub files: Vec<String>, // 返回关联的文件名列表供前端展示
 }
@@ -90,10 +96,16 @@ pub struct CliStatus {
 /// 检测 CLI 是否安装并获取版本
 pub fn check_cli_installed(app: &CliApp) -> (bool, Option<String>) {
     let cmd = app.as_str();
+    // 默认使用命令名，如果 fallback 找到路径则更新为绝对路径
+    let mut executable_path = PathBuf::from(cmd);
     
     // 1. 优先使用 which/where 检测 (遵循 PATH)
     let which_output = if cfg!(target_os = "windows") {
-        Command::new("where").arg(cmd).output()
+        let mut c = Command::new("where");
+        c.arg(cmd);
+        #[cfg(target_os = "windows")]
+        c.creation_flags(CREATE_NO_WINDOW);
+        c.output()
     } else {
         Command::new("which").arg(cmd).output()
     };
@@ -112,6 +124,7 @@ pub fn check_cli_installed(app: &CliApp) -> (bool, Option<String>) {
             if full_path.exists() {
                 tracing::debug!("[CLI-Sync] Detected {} via explicit path: {:?}", cmd, full_path);
                 installed = true;
+                executable_path = full_path;
                 break;
             }
         }
@@ -122,7 +135,12 @@ pub fn check_cli_installed(app: &CliApp) -> (bool, Option<String>) {
     }
 
     // 2. 获取版本
-    let version_output = Command::new(cmd).arg("--version").output();
+    let mut ver_cmd = Command::new(&executable_path);
+    ver_cmd.arg("--version");
+    #[cfg(target_os = "windows")]
+    ver_cmd.creation_flags(CREATE_NO_WINDOW);
+
+    let version_output = ver_cmd.output();
     let version = match version_output {
         Ok(out) if out.status.success() => {
             let s = String::from_utf8_lossy(&out.stdout).trim().to_string();
@@ -144,16 +162,27 @@ pub fn check_cli_installed(app: &CliApp) -> (bool, Option<String>) {
 }
 
 /// 读取当前配置并检测同步状态
-pub fn get_sync_status(app: &CliApp, proxy_url: &str) -> (bool, Option<String>) {
+pub fn get_sync_status(app: &CliApp, proxy_url: &str) -> (bool, bool, Option<String>) {
     let files = app.config_files();
     if files.is_empty() {
-        return (false, None);
+        return (false, false, None);
     }
 
     let mut all_synced = true;
+    let mut has_backup = false;
     let mut current_base_url = None;
 
     for file in &files {
+        // 检查是否有备份文件
+        let backup_path = file.path.with_extension(format!("{}{}", file.path.extension().unwrap_or_default().to_string_lossy(), ".antigravity.bak"));
+        // 或者更简单的命名规则: original_name + .antigravity.bak
+        let backup_path = file.path.with_file_name(format!("{}.antigravity.bak", file.name));
+        
+        if backup_path.exists() {
+            has_backup = true;
+        }
+
+        // 如果物理文件不存在
         // 如果物理文件不存在
         if !file.path.exists() {
             // Gemini 的 settings.json/config.json 只要有一个存在即可，或者都不存在（视为未同步）
@@ -224,7 +253,7 @@ pub fn get_sync_status(app: &CliApp, proxy_url: &str) -> (bool, Option<String>) 
         }
     }
 
-    (all_synced, current_base_url)
+    (all_synced, has_backup, current_base_url)
 }
 
 /// 执行同步逻辑
@@ -242,6 +271,19 @@ pub fn sync_config(app: &CliApp, proxy_url: &str, api_key: &str) -> Result<(), S
 
         if let Some(parent) = file.path.parent() {
             fs::create_dir_all(parent).map_err(|e| format!("无法创建目录: {}", e))?;
+        }
+
+        // [New Feature] 自动备份：如果文件存在且没有备份，创建 .antigravity.bak 备份
+        // 这样可以保留用户最初的配置，后续多次同步不会覆盖这个备份
+        if file.path.exists() {
+            let backup_path = file.path.with_file_name(format!("{}.antigravity.bak", file.name));
+            if !backup_path.exists() {
+                if let Err(e) = fs::copy(&file.path, &backup_path) {
+                    tracing::warn!("Failed to create backup for {}: {}", file.name, e);
+                } else {
+                    tracing::info!("Created backup for {}: {:?}", file.name, backup_path);
+                }
+            }
         }
 
         let mut content = if file.path.exists() {
@@ -341,16 +383,17 @@ pub fn sync_config(app: &CliApp, proxy_url: &str, api_key: &str) -> Result<(), S
 #[tauri::command]
 pub async fn get_cli_sync_status(app_type: CliApp, proxy_url: String) -> Result<CliStatus, String> {
     let (installed, version) = check_cli_installed(&app_type);
-    let (is_synced, current_base_url) = if installed {
+    let (is_synced, has_backup, current_base_url) = if installed {
         get_sync_status(&app_type, &proxy_url)
     } else {
-        (false, None)
+        (false, false, None)
     };
 
     Ok(CliStatus {
         installed,
         version,
         is_synced,
+        has_backup,
         current_base_url,
         files: app_type.config_files().into_iter().map(|f| f.name).collect(),
     })
@@ -363,6 +406,27 @@ pub async fn execute_cli_sync(app_type: CliApp, proxy_url: String, api_key: Stri
 
 #[tauri::command]
 pub async fn execute_cli_restore(app_type: CliApp) -> Result<(), String> {
+    let files = app_type.config_files();
+    let mut restored_count = 0;
+
+    // 尝试从备份恢复
+    for file in &files {
+        let backup_path = file.path.with_file_name(format!("{}.antigravity.bak", file.name));
+        if backup_path.exists() {
+            // 还原：覆盖原文件
+            if let Err(e) = fs::rename(&backup_path, &file.path) {
+                return Err(format!("恢复备份失败 {}: {}", file.name, e));
+            }
+            restored_count += 1;
+        }
+    }
+
+    if restored_count > 0 {
+        // 如果成功恢复了至少一个备份，就认为是恢复成功
+        return Ok(());
+    }
+
+    // 如果没有备份，则执行原来的逻辑：恢复为默认配置
     let default_url = app_type.default_url();
     // 恢复默认时清空 API Key，让用户重新授权或使用官方 Key
     sync_config(&app_type, default_url, "")

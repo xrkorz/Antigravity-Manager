@@ -31,6 +31,7 @@ interface CliStatus {
     installed: boolean;
     version: string | null;
     is_synced: boolean;
+    has_backup: boolean;
     current_base_url: string | null;
     files: string[];
 }
@@ -59,6 +60,7 @@ export const CliSyncCard = ({ proxyUrl, apiKey, className }: CliSyncCardProps) =
         allFiles: string[]
     } | null>(null);
     const [restoreConfirmApp, setRestoreConfirmApp] = useState<CliAppType | null>(null);
+    const [syncConfirmApp, setSyncConfirmApp] = useState<CliAppType | null>(null);
 
     // 根据不同的 CLI 应用格式化 Proxy URL
     const getFormattedProxyUrl = useCallback((app: CliAppType) => {
@@ -88,7 +90,15 @@ export const CliSyncCard = ({ proxyUrl, apiKey, className }: CliSyncCardProps) =
         }
     }, [getFormattedProxyUrl]);
 
-    const handleSync = async (app: CliAppType) => {
+    const handleSync = (app: CliAppType) => {
+        setSyncConfirmApp(app);
+    };
+
+    const executeSync = async () => {
+        const app = syncConfirmApp;
+        if (!app) return;
+        setSyncConfirmApp(null);
+
         if (!proxyUrl || !apiKey) {
             showToast(t('proxy.cli_sync.toast.config_missing', { defaultValue: '请先生成 API Key 并启动服务' }), 'error');
             return;
@@ -226,7 +236,7 @@ export const CliSyncCard = ({ proxyUrl, apiKey, className }: CliSyncCardProps) =
                                     <button
                                         onClick={() => handleRestore(app)}
                                         className="p-0.5 hover:text-orange-500 transition-colors"
-                                        title={t('proxy.cli_sync.btn_restore')}
+                                        title={status.has_backup ? t('proxy.cli_sync.btn_restore_backup') : t('proxy.cli_sync.btn_restore')}
                                     >
                                         <RotateCcw size={12} />
                                     </button>
@@ -335,13 +345,29 @@ export const CliSyncCard = ({ proxyUrl, apiKey, className }: CliSyncCardProps) =
                     </div>
                 </div>
             )}
-            {/* 恢复默认确认弹窗 */}
+            {/* 恢复默认/备份确认弹窗 */}
             <ModalDialog
                 isOpen={!!restoreConfirmApp}
-                title={t('proxy.cli_sync.title')}
-                message={restoreConfirmApp ? t('proxy.cli_sync.restore_confirm', { name: restoreConfirmApp }) : ''}
+                title={statuses[restoreConfirmApp!]?.has_backup
+                    ? t('proxy.cli_sync.btn_restore_backup')
+                    : t('proxy.cli_sync.btn_restore') || t('proxy.cli_sync.title')}
+                message={restoreConfirmApp
+                    ? (statuses[restoreConfirmApp!]?.has_backup
+                        ? t('proxy.cli_sync.restore_backup_confirm')
+                        : t('proxy.cli_sync.restore_confirm', { name: restoreConfirmApp }))
+                    : ''}
                 onConfirm={executeRestore}
                 onCancel={() => setRestoreConfirmApp(null)}
+                isDestructive={true}
+            />
+
+            {/* 同步配置确认弹窗 (Issue #756) */}
+            <ModalDialog
+                isOpen={!!syncConfirmApp}
+                title={t('proxy.cli_sync.sync_confirm_title')}
+                message={syncConfirmApp ? t('proxy.cli_sync.sync_confirm_message', { name: syncConfirmApp }) : ''}
+                onConfirm={executeSync}
+                onCancel={() => setSyncConfirmApp(null)}
                 isDestructive={true}
             />
         </div>

@@ -645,6 +645,10 @@
             "btn_sync": "立即同步配置",
             "btn_view": "檢視當前配置",
             "btn_restore": "恢復預設配置",
+            "btn_restore_backup": "還原原有配置",
+            "restore_backup_confirm": "檢測到舊的配置檔案備份，確定要還原嗎？",
+            "sync_confirm_title": "同步確認",
+            "sync_confirm_message": "即將為您同步 {{name}} 的配置。⚠️ 注意：此操作將覆蓋您本地已有的配置檔案（如登入狀態、API Key 等）。確定要繼續嗎？",
             "restore_confirm": "確定要將 {{name}} 的配置恢復為官方預設 URL 嗎？",
             "modal": {
                 "view_title": "{{name}} 配置文件內容",

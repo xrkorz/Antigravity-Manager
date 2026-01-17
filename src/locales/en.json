@@ -657,7 +657,9 @@
             "btn_sync": "Sync Config Now",
             "btn_view": "View Config",
             "btn_restore": "Restore Defaults",
+            "btn_restore_backup": "Restore Backup",
             "restore_confirm": "Are you sure you want to restore the configuration for {{name}} to the official default URL?",
+            "restore_backup_confirm": "Backup configuration found. Are you sure you want to restore it?",
             "modal": {
                 "view_title": "{{name}} Config Content",
                 "copy_success": "Config content copied"
@@ -665,7 +667,9 @@
             "toast": {
                 "sync_success": "Sync successful! {{name}} is ready.",
                 "sync_error": "Sync failed: {{error}}"
-            }
+            },
+            "sync_confirm_title": "Sync Confirmation",
+            "sync_confirm_message": "Ready to sync {{name}} configuration. ⚠️ Warning: This will overwrite your existing local configuration files (e.g. login tokens, API Keys). Are you sure you want to continue?"
         }
     },
     "monitor": {
