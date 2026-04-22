@@ -5,6 +5,11 @@ name: Sync Fork
     - cron: '0 */6 * * *'
   repository_dispatch:
     types: [sync-fork]
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/sync-fork.yml'
+      - '.github/upstream-sync-state.json'
 
 permissions:
   contents: write
