@@ -1,15 +1,9 @@
 name: Sync Fork
 
-"on":
+on:
   schedule:
     - cron: '0 */6 * * *'
-  repository_dispatch:
-    types: [sync-fork]
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/sync-fork.yml'
-      - '.github/upstream-sync-state.json'
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -39,7 +33,6 @@ jobs:
           UPSTREAM_SHA=$(git rev-parse upstream/main)
           STATE_SHA=$(python3 -c 'import json, pathlib; p=pathlib.Path(".github/upstream-sync-state.json"); print(json.loads(p.read_text()).get("upstream_sha", "") if p.exists() else "")')
           echo "upstream_sha=${UPSTREAM_SHA}" >> "$GITHUB_OUTPUT"
-          echo "state_sha=${STATE_SHA}" >> "$GITHUB_OUTPUT"
           if [ "$UPSTREAM_SHA" = "$STATE_SHA" ] && [ -n "$STATE_SHA" ]; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
             echo "No upstream changes detected."
