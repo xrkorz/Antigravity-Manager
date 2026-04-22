@@ -1,9 +1,9 @@
 name: Sync Fork
 
-on:
+"on":
   schedule:
     - cron: '0 */6 * * *'
-  workflow_dispatch:
+  workflow_dispatch: {}
 
 permissions:
   contents: write
@@ -23,25 +23,15 @@ jobs:
         env:
           SYNC_FORK_TOKEN: ${{ secrets.SYNC_FORK_TOKEN }}
         run: |
+          set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git remote set-url origin https://x-access-token:${SYNC_FORK_TOKEN}@github.com/xrkorz/Antigravity-Manager.git
-          git remote add upstream https://github.com/lbjlaq/Antigravity-Manager.git
+          git remote add upstream https://github.com/lbjlaq/Antigravity-Manager.git 2>/dev/null || git remote set-url upstream https://github.com/lbjlaq/Antigravity-Manager.git
           git fetch origin main
           git fetch upstream main
           UPSTREAM_SHA=$(git rev-parse upstream/main)
-          STATE_SHA=""
-          if [ -f .github/upstream-sync-state.json ]; then
-            STATE_SHA=$(python3 - <<'PY'
-import json
-from pathlib import Path
-p = Path('.github/upstream-sync-state.json')
-if p.exists():
-    data = json.loads(p.read_text())
-    print(data.get('upstream_sha', ''))
-PY
-)
-          fi
+          STATE_SHA=$(python3 -c 'import json, pathlib; p=pathlib.Path(".github/upstream-sync-state.json"); print(json.loads(p.read_text()).get("upstream_sha", "") if p.exists() else "")')
           echo "upstream_sha=${UPSTREAM_SHA}" >> "$GITHUB_OUTPUT"
           echo "state_sha=${STATE_SHA}" >> "$GITHUB_OUTPUT"
           if [ "$UPSTREAM_SHA" = "$STATE_SHA" ] && [ -n "$STATE_SHA" ]; then
@@ -57,6 +47,7 @@ PY
         env:
           SYNC_FORK_TOKEN: ${{ secrets.SYNC_FORK_TOKEN }}
         run: |
+          set -euo pipefail
           git remote set-url origin https://x-access-token:${SYNC_FORK_TOKEN}@github.com/xrkorz/Antigravity-Manager.git
           git fetch origin main
           git checkout -B main origin/main
@@ -69,26 +60,28 @@ PY
           SYNC_FORK_TOKEN: ${{ secrets.SYNC_FORK_TOKEN }}
           UPSTREAM_SHA: ${{ steps.compare.outputs.upstream_sha }}
         run: |
+          set -euo pipefail
           mkdir -p /tmp/sync-fork-backup
           cp .github/workflows/sync-fork.yml /tmp/sync-fork-backup/sync-fork.yml
           git remote set-url origin https://x-access-token:${SYNC_FORK_TOKEN}@github.com/xrkorz/Antigravity-Manager.git
           git fetch upstream main
           git checkout -B main origin/main
           git reset --hard upstream/main
-          mkdir -p .github/workflows
+          mkdir -p .github/workflows .github
           cp /tmp/sync-fork-backup/sync-fork.yml .github/workflows/sync-fork.yml
-          cat > .github/upstream-sync-state.json <<JSON
-          {
-            "upstream": "lbjlaq/Antigravity-Manager",
-            "branch": "main",
-            "upstream_sha": "${UPSTREAM_SHA}"
-          }
-          JSON
+          python3 - <<'PY2'
+import json, os, pathlib
+path = pathlib.Path('.github/upstream-sync-state.json')
+path.write_text(json.dumps({
+  'upstream': 'lbjlaq/Antigravity-Manager',
+  'branch': 'main',
+  'upstream_sha': os.environ['UPSTREAM_SHA']
+}, indent=2) + '\n')
+PY2
           git add .github/workflows/sync-fork.yml .github/upstream-sync-state.json
           git commit -m "chore: preserve fork sync workflow metadata"
           git push origin HEAD:main --force
 
       - name: Report skipped sync
         if: steps.compare.outputs.changed != 'true'
-        run: |
-          echo "backup-main unchanged because upstream SHA matches recorded sync state"
+        run: echo "backup-main unchanged because upstream SHA matches recorded sync state"
