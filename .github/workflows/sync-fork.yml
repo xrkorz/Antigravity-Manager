@@ -2,11 +2,11 @@ name: Sync Fork
 
 on:
   schedule:
-    - cron: '0 */6 * * *'
+    - cron: '0 * * * *'
   push:
     branches: [main]
     paths:
-      - '.github/workflows/sync-fork-v2.yml'
+      - '.github/workflows/sync-fork.yml'
       - '.github/upstream-sync-state.json'
 
 permissions:
@@ -65,15 +65,15 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p /tmp/sync-fork-backup
-          cp .github/workflows/sync-fork-v2.yml /tmp/sync-fork-backup/sync-fork-v2.yml
+          cp .github/workflows/sync-fork.yml /tmp/sync-fork-backup/sync-fork.yml
           git remote set-url origin https://x-access-token:${SYNC_FORK_TOKEN}@github.com/xrkorz/Antigravity-Manager.git
           git fetch upstream main
           git checkout -B main origin/main
           git reset --hard upstream/main
           mkdir -p .github/workflows .github
-          cp /tmp/sync-fork-backup/sync-fork-v2.yml .github/workflows/sync-fork-v2.yml
+          cp /tmp/sync-fork-backup/sync-fork.yml .github/workflows/sync-fork.yml
           printf '{\n  "upstream": "lbjlaq/Antigravity-Manager",\n  "branch": "main",\n  "upstream_sha": "%s"\n}\n' "$UPSTREAM_SHA" > .github/upstream-sync-state.json
-          git add .github/workflows/sync-fork-v2.yml .github/upstream-sync-state.json
+          git add .github/workflows/sync-fork.yml .github/upstream-sync-state.json
           git commit -m "chore: preserve fork sync workflow metadata"
           git push origin HEAD:main --force
 
