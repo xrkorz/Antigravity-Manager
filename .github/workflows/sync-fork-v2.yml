@@ -35,11 +35,7 @@ jobs:
           git fetch origin main
           git fetch upstream main
           UPSTREAM_SHA=$(git rev-parse upstream/main)
-          STATE_SHA=$(python3 -c 'import json, pathlib; p=pathlib.Path(".github/upstream-sync-state.json");
-try:
-    print(json.loads(p.read_text()).get("upstream_sha", "") if p.exists() else "")
-except Exception:
-    print("")')
+          STATE_SHA=$(python3 -c 'import json, pathlib; p=pathlib.Path(".github/upstream-sync-state.json"); txt=(p.read_text().replace("\\n", "") if p.exists() else ""); print(json.loads(txt).get("upstream_sha", "") if txt else "")')
           echo "upstream_sha=${UPSTREAM_SHA}" >> "$GITHUB_OUTPUT"
           if [ "$UPSTREAM_SHA" = "$STATE_SHA" ] && [ -n "$STATE_SHA" ]; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
