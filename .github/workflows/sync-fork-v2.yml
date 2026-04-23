@@ -72,7 +72,8 @@ jobs:
           git reset --hard upstream/main
           mkdir -p .github/workflows .github
           cp /tmp/sync-fork-backup/sync-fork-v2.yml .github/workflows/sync-fork-v2.yml
-          python3 -c 'import json, os, pathlib; pathlib.Path(".github/upstream-sync-state.json").write_text(json.dumps({"upstream":"lbjlaq/Antigravity-Manager","branch":"main","upstream_sha":os.environ["UPSTREAM_SHA"]}, indent=2) + "\n")'
+          python3 -c 'import json, os, pathlib; pathlib.Path(".github/upstream-sync-state.json").write_text(json.dumps({"upstream":"lbjlaq/Antigravity-Manager","branch":"main","upstream_sha":os.environ["UPSTREAM_SHA"]}, indent=2) + "
+")'
           git add .github/workflows/sync-fork-v2.yml .github/upstream-sync-state.json
           git commit -m "chore: preserve fork sync workflow metadata"
           git push origin HEAD:main --force
