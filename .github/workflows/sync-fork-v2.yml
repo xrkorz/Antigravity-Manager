@@ -3,7 +3,11 @@ name: Sync Fork V2
 on:
   schedule:
     - cron: '0 */6 * * *'
-  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/sync-fork-v2.yml'
+      - '.github/upstream-sync-state.json'
 
 permissions:
   contents: write
@@ -62,6 +66,7 @@ jobs:
           set -euo pipefail
           mkdir -p /tmp/sync-fork-backup
           cp .github/workflows/sync-fork-v2.yml /tmp/sync-fork-backup/sync-fork-v2.yml
+          cp .github/upstream-sync-state.json /tmp/sync-fork-backup/upstream-sync-state.json 2>/dev/null || true
           git remote set-url origin https://x-access-token:${SYNC_FORK_TOKEN}@github.com/xrkorz/Antigravity-Manager.git
           git fetch upstream main
           git checkout -B main origin/main
